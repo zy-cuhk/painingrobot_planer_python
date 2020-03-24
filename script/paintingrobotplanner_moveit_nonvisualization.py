@@ -50,20 +50,8 @@ class Renovationrobot_motion():
 
         # definition of three moveit groups
         mobileplatform = moveit_commander.MoveGroupCommander('mobileplatform')
-
-        # mobileplatform.set_goal_joint_tolerance(0.001)
-        # mobileplatform.set_max_acceleration_scaling_factor(1)
-        # mobileplatform.set_max_velocity_scaling_factor(1)
-
         rodclimbing_robot = moveit_commander.MoveGroupCommander('rodclimbing_robot')
-        # rodclimbing_robot.set_goal_joint_tolerance(0.001)
-        # rodclimbing_robot.set_max_acceleration_scaling_factor(1)
-        # rodclimbing_robot.set_max_velocity_scaling_factor(1)
-
         arm = moveit_commander.MoveGroupCommander('aubo5')
-        # arm.set_goal_joint_tolerance(0.01)
-        # arm.set_max_acceleration_scaling_factor(1)
-        # arm.set_max_velocity_scaling_factor(1)
 
         # computation of target joints of mobile platform
         theta_z=manipulatorbase_targetpose_onecell[0][5]
@@ -96,16 +84,7 @@ class Renovationrobot_motion():
 
 
         # computation of forward paths of manipulator
-        manipulatorendeffector_targetpose_onecell_new=np.zeros(manipulatorendeffector_targetpose_onecell.shape)
-        for i in range(len(manipulatorendeffector_targetpose_onecell_new)/2):
-            if i%2==0:
-                for j in range(len(manipulatorendeffector_targetpose_onecell_new[i])):
-                    manipulatorendeffector_targetpose_onecell_new[2*i][j]=manipulatorendeffector_targetpose_onecell[2*i][j]
-                    manipulatorendeffector_targetpose_onecell_new[2*i+1][j]=manipulatorendeffector_targetpose_onecell[2*i+1][j]
-            else:
-                for j in range(len(manipulatorendeffector_targetpose_onecell_new[i])):
-                    manipulatorendeffector_targetpose_onecell_new[2*i][j]=manipulatorendeffector_targetpose_onecell[2*i+1][j]
-                    manipulatorendeffector_targetpose_onecell_new[2*i+1][j]=manipulatorendeffector_targetpose_onecell[2*i][j]
+        manipulatorendeffector_targetpose_onecell_new=manipulatorendeffector_targetpose_onecell
 
         # computation of inverse joints of manipulator
         interval = 0.10
@@ -139,6 +118,7 @@ class Renovationrobot_motion():
             for i in range(points_num):
                 # motion of manipulator
                 aubo_joints=np.array(aubo_joints_list[6*i:6*i+6])
+                print('aubo_joints=:',aubo_joints)
                 arm.set_joint_value_target(aubo_joints)
                 arm_state=arm.go()
         #     rospy.sleep(0.2)
@@ -168,23 +148,13 @@ if __name__ == "__main__":
         #         for k in range(len(manipulatorbase_targetpose[0][i][0][j][0])):
         # for i in range(len(manipulatorbase_targetpose[0])):
         for i in range(1):
-            # for j in range(1):
-            if i==0:
-                for j in range(1):
-                # for j in range(len(manipulatorbase_targetpose[0][i][0])):
-                    for k in range(len(manipulatorbase_targetpose[0][i][0][j][0])):
-                    # for k in range(len(manipulatorbase_targetpose[0][i][0][j][0])):
-                        if k==len(manipulatorbase_targetpose[0][i][0][j][0])-1:
-                        # for k in range(len(manipulatorbase_targetpose[0][i][0][j][0])):
-                            manipulatorbase_targetpose_onecell = manipulatorbase_targetpose[0][i][0][j][0][k]
-                            manipulatorendeffector_targetpose_onecell = manipulatorendeffector_targetpose[0][i][0][j][0][k]
+            for j in range(1):
+                for k in range(1):
+                    manipulatorbase_targetpose_onecell = manipulatorbase_targetpose[0][i][0][j][0][k]
+                    manipulatorendeffector_targetpose_onecell = manipulatorendeffector_targetpose[0][i][0][j][0][k]
 
-                            # print("manipulatorbase_targetpose_onecell=",manipulatorbase_targetpose_onecell)
-                            # print("manipulatorendeffector_targetpose_onecell=",manipulatorendeffector_targetpose_onecell)
-                            # Paintrobot.show_obstacles()
-
-                            visualization_num=Paintrobot.motion(manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,visualization_num)
-                            visualization_num=visualization_num+1
+                    visualization_num=Paintrobot.motion(manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,visualization_num)
+                    visualization_num=visualization_num+1
     except rospy.ROSInterruptException:
         pass
     moveit_commander.roscpp_shutdown()
@@ -192,74 +162,3 @@ if __name__ == "__main__":
 
 
 
-
-    # print("manipulatorbase_pose=:", manipulatorbase_pose)
-    # print('mobileplatform_joint=:', mobileplatform_joint)
-    # print('rodclimbing_robot_joints=:', rodclimbing_robot_joints)
-
-    # def show_obstacles(self):
-    #     # 初始化场景对象
-    #     scene = PlanningSceneInterface()
-    #     # 创建一个发布场景变化信息的发布者
-    #     scene_pub = rospy.Publisher('planning_scene', PlanningScene, queue_size=5)
-    #
-    #     # 创建一个存储物体颜色的字典对象
-    #     colors = dict()
-    #     # 设置场景物体的名称
-    #     table_id = 'table'
-    #     box1_id = 'box1'
-    #     box2_id = 'box2'
-    #     # 设置桌面的高度
-    #     table_ground = 0.25
-    #     # 设置table、box1和box2的三维尺寸
-    #     table_size = [0.2, 0.7, 0.01]
-    #     box1_size = [0.1, 0.05, 0.05]
-    #     box2_size = [0.05, 0.05, 0.15]
-    #
-    #     # 将三个物体加入场景当中
-    #     table_pose = PoseStamped()
-    #     table_pose.header.frame_id = 'base_link'
-    #     table_pose.pose.position.x = 0.26
-    #     table_pose.pose.position.y = 0.0
-    #     table_pose.pose.position.z = table_ground + table_size[2] / 2.0
-    #     table_pose.pose.orientation.w = 1.0
-    #     scene.add_box(table_id, table_pose, table_size)
-    #
-    #     box1_pose = PoseStamped()
-    #     box1_pose.header.frame_id = 'base_link'
-    #     box1_pose.pose.position.x = 0.21
-    #     box1_pose.pose.position.y = -0.1
-    #     box1_pose.pose.position.z = table_ground + table_size[2] + box1_size[2] / 2.0
-    #     box1_pose.pose.orientation.w = 1.0
-    #     scene.add_box(box1_id, box1_pose, box1_size)
-    #
-    #     box2_pose = PoseStamped()
-    #     box2_pose.header.frame_id = 'base_link'
-    #     box2_pose.pose.position.x = 0.19
-    #     box2_pose.pose.position.y = 0.15
-    #     box2_pose.pose.position.z = table_ground + table_size[2] + box2_size[2] / 2.0
-    #     box2_pose.pose.orientation.w = 1.0
-    #     scene.add_box(box2_id, box2_pose, box2_size)
-    #
-    #     # 将桌子设置成红色，两个box设置成橙色
-    #     colors[table_id]=self.setColor(0.8, 0, 0, 1.0)
-    #     colors[box1_id]=self.setColor(0.8, 0.4, 0, 1.0)
-    #     colors[box2_id]=self.setColor(0.8, 0.4, 0, 1.0)
-    #     # 初始化规划场景对象
-    #     p = PlanningScene()
-    #     # 需要设置规划场景是否有差异
-    #     p.is_diff = True
-    #     # 从颜色字典中取出颜色设置
-    #     for color in colors.values():
-    #         p.object_colors.append(color)
-    #     scene_pub.publish(p)
-    #
-    # # 设置场景物体的颜色
-    # def setColor(self, name, r, g, b, a=0.9):
-    #     color = ObjectColor()
-    #     color.id = name
-    #     color.color.r = r
-    #     color.color.g = g
-    #     color.color.b = b
-    #     color.color.a = a
-    #     return color
