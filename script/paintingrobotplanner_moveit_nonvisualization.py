@@ -25,8 +25,8 @@ class Renovationrobot_motion():
     def __init__(self):
         self.parameterx=0.430725381079
         self.parametery=-0.00033063639818
-        self.parameterz=1.32061628232
-        self.distance=0.10
+        self.parameterz=0.028625
+        self.interval=0.10
 
     def homing(self):
         # definition of three moveit groups
@@ -73,7 +73,8 @@ class Renovationrobot_motion():
         manipulatorbase_pose = rodclimbing_robot.get_current_pose('aubo_baselink').pose
         mobileplatform_joint = mobileplatform.get_current_joint_values()
         rodclimbing_robot_joints = rodclimbing_robot.get_current_joint_values()
-        rodclimbing_robot_targetjoints=[manipulatorbase_targetpose_onecell[0][2]-manipulatorbase_pose.position.z+rodclimbing_robot_joints[0],rodclimbing_robot_joints[1]]
+        # rodclimbing_robot_targetjoints=[manipulatorbase_targetpose_onecell[0][2]-manipulatorbase_pose.position.z+rodclimbing_robot_joints[0],0.0]
+        rodclimbing_robot_targetjoints=[manipulatorbase_targetpose_onecell[0][2]-self.parameterz,0.0]
 
         # motion of rod climbing robot
         print("rodclimbing_robot_targetjoints=",rodclimbing_robot_targetjoints)
@@ -82,34 +83,35 @@ class Renovationrobot_motion():
         rodclimbing_robot_state=rodclimbing_robot.go()
         rospy.sleep(0.2)
 
-
-        # computation of forward paths of manipulator
-        manipulatorendeffector_targetpose_onecell_new=manipulatorendeffector_targetpose_onecell
-
         # computation of inverse joints of manipulator
-        interval = 0.10
-        aubo_joints_list=np.array([0.7432146906113353, -0.6072259915236845, 1.387201205355398, 1.9944271968790823, 0.8275816361835613, 1.5707963267948966])
+        aubo_joints_list=np.array([-0.2852509833270265, -0.5320376301933496, 1.3666906155038931, -1.2428644078925508, -1.856047310121923,1.5707963267948966])
+        # aubo_joints_list=np.array([0.7432146906113353, -0.6072259915236845, 1.387201205355398, 1.9944271968790823, 0.8275816361835613, 1.5707963267948966])
         previous_aubo_joints=aubo_joints_list
-        for i in range(len(manipulatorendeffector_targetpose_onecell_new)-1):
-            p1=np.array([manipulatorendeffector_targetpose_onecell_new[i][0],manipulatorendeffector_targetpose_onecell_new[i][1],manipulatorendeffector_targetpose_onecell_new[i][2]])
-            p2=np.array([manipulatorendeffector_targetpose_onecell_new[i+1][0],manipulatorendeffector_targetpose_onecell_new[i+1][1],manipulatorendeffector_targetpose_onecell_new[i+1][2]])
+        for i in range(len(manipulatorendeffector_targetpose_onecell)-1):
+            p1=np.array([manipulatorendeffector_targetpose_onecell[i][0],manipulatorendeffector_targetpose_onecell[i][1],manipulatorendeffector_targetpose_onecell[i][2]])
+            p2=np.array([manipulatorendeffector_targetpose_onecell[i+1][0],manipulatorendeffector_targetpose_onecell[i+1][1],manipulatorendeffector_targetpose_onecell[i+1][2]])
             distance=sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2+(p1[2]-p2[2])**2)
             p=np.zeros(3)
-            if i==len(manipulatorendeffector_targetpose_onecell_new)-2:
-                num = int(distance / interval)+2
+            if i==len(manipulatorendeffector_targetpose_onecell)-2:
+                num = int(distance / self.interval)+2
             else:
-                num = int(distance / interval)+1
+                num = int(distance / self.interval)+1
             for j in range(num):
-                p[0] = p1[0] + (p2[0] - p1[0]) / distance * interval * j
-                p[1] = p1[1] + (p2[1] - p1[1]) / distance * interval * j
-                p[2] = p1[2] + (p2[2] - p1[2]) / distance * interval * j
-                q=np.array([manipulatorendeffector_targetpose_onecell_new[i][3],manipulatorendeffector_targetpose_onecell_new[i][4],manipulatorendeffector_targetpose_onecell_new[i][5]])
+                p[0] = p1[0] + (p2[0] - p1[0]) / distance * self.interval * j
+                p[1] = p1[1] + (p2[1] - p1[1]) / distance * self.interval * j
+                p[2] = p1[2] + (p2[2] - p1[2]) / distance * self.interval * j
+                q=np.array([manipulatorendeffector_targetpose_onecell[i][3],manipulatorendeffector_targetpose_onecell[i][4],manipulatorendeffector_targetpose_onecell[i][5]])
                 T_mat_generation=pose2mat()
                 mat=T_mat_generation.mat4x4(p,q)
                 mat1=np.ravel(mat)
                 mat2=mat1.tolist()
                 aubo_arm = Aubo_kinematics()
+                q_reslut_dic,num_sols=aubo_arm.aubo_inverse(mat2)
+                # print("q result is:")
+                # for i in range(len(q_reslut_dic)):
+                #     print(q_reslut_dic[i])
                 aubo_joints_onepoint=aubo_arm.GetInverseResult(mat2,previous_aubo_joints)
+                # print("selected aubo joints is",aubo_joints_onepoint)
                 previous_aubo_joints=aubo_joints_onepoint
                 aubo_joints_list=np.append(aubo_joints_list,aubo_joints_onepoint,axis=0)
 
