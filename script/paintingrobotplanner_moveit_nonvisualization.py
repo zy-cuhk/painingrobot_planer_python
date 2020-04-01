@@ -133,7 +133,7 @@ class Renovationrobot_motion():
 
 
 if __name__ == "__main__":
-    mat_path="/home/zy/catkin_ws/src/paintingrobot_related/paintingrobot_planning/script/planner_result/data.mat"
+    mat_path="/home/zy/catkin_ws/src/paintingrobot/paintingrobot_planning/script/planner_result/data.mat"
     # mat_path="package://paintingrobot_planning/script/data.mat"
     data = io.loadmat(mat_path)
     manipulatorbase_targetpose=data['renovation_cells_manipulatorbase_positions']
