@@ -17,6 +17,7 @@
 
 import rospy, sys
 import moveit_commander
+from math import *
 
 class MoveItFkDemo:
     def __init__(self):
@@ -27,7 +28,7 @@ class MoveItFkDemo:
         rospy.init_node('moveit_fk_demo', anonymous=True)
  
         # 初始化需要使用move group控制的机械臂中的arm group
-        arm = moveit_commander.MoveGroupCommander('aubo5')
+        arm = moveit_commander.MoveGroupCommander('manipulator_i5')
         
         # 设置机械臂运动的允许误差值
         arm.set_goal_joint_tolerance(0.001)
@@ -37,22 +38,25 @@ class MoveItFkDemo:
         arm.set_max_velocity_scaling_factor(0.5)
         
         # 控制机械臂先回到初始化位置
-        arm.set_named_target('home3')
-        arm.go()
-        rospy.sleep(1)
+        # arm.set_named_target('home')
+        # arm.go()
+        # rospy.sleep(1)
          
         # 设置机械臂的目标位置，使用六轴的位置数据进行描述（单位：弧度）
-        joint_positions = [0.391410, -0.676384, -0.376217, 0.0, 1.052834, 0.454125]
+        joint_positions = [37.57375715065746, -11.383079576802844, 70.85252590777291, -79.0851925954415, -53.913611719443864, -101.26192346042423]
+        
+        for i in range(len(joint_positions)):
+            joint_positions[i]=joint_positions[i]/180.0*pi
         arm.set_joint_value_target(joint_positions)
-                 
+
         # 控制机械臂完成运动
         arm.go()
         rospy.sleep(1)
 
-        # 控制机械臂先回到初始化位置
-        arm.set_named_target('home3')
-        arm.go()
-        rospy.sleep(1)
+        # # 控制机械臂先回到初始化位置
+        # arm.set_named_target('home')
+        # arm.go()
+        # rospy.sleep(1)
         
         # 关闭并退出moveit
         moveit_commander.roscpp_shutdown()

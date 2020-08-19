@@ -45,22 +45,25 @@ class Renovationrobot_motion():
         arm.set_named_target('home3')
         arm.go()
         rospy.sleep(1)
-    def motion(self,manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,paintingrobotendeffector_targetpose_onecell,painting_targetregion_onecell,visualization_num):
+    # def motion(self,manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,paintingrobotendeffector_targetpose_onecell,painting_targetregion_onecell,visualization_num):
+
+    def motion(self,manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,paintingrobotendeffector_targetpose_onecell,visualization_num):
+
         marker_pub = rospy.Publisher("visualization_marker", Marker, queue_size=10)
 
         # definition of three moveit groups
-        mobileplatform = moveit_commander.MoveGroupCommander('mobileplatform')
+        # mobileplatform = moveit_commander.MoveGroupCommander('mobileplatform')
 
         # mobileplatform.set_goal_joint_tolerance(0.001)
         # mobileplatform.set_max_acceleration_scaling_factor(1)
         # mobileplatform.set_max_velocity_scaling_factor(1)
 
-        rodclimbing_robot = moveit_commander.MoveGroupCommander('rodclimbing_robot')
+        # rodclimbing_robot = moveit_commander.MoveGroupCommander('rodclimbing_robot')
         # rodclimbing_robot.set_goal_joint_tolerance(0.001)
         # rodclimbing_robot.set_max_acceleration_scaling_factor(1)
         # rodclimbing_robot.set_max_velocity_scaling_factor(1)
 
-        arm = moveit_commander.MoveGroupCommander('aubo5')
+        # arm = moveit_commander.MoveGroupCommander('aubo5')
         # arm.set_goal_joint_tolerance(0.01)
         # arm.set_max_acceleration_scaling_factor(1)
         # arm.set_max_velocity_scaling_factor(1)
@@ -92,9 +95,9 @@ class Renovationrobot_motion():
         # rospy.sleep(0.2)
 
         # motion of mobile platform
-        mobileplatform.set_joint_value_target(mobileplatform_targetjoints)
-        mobileplatform_state=mobileplatform.go()
-        rospy.sleep(0.2)
+        # mobileplatform.set_joint_value_target(mobileplatform_targetjoints)
+        # mobileplatform_state=mobileplatform.go()
+        # rospy.sleep(0.2)
 
         # computation of target joints of rodclimbing_robot
         manipulatorbase_pose = rodclimbing_robot.get_current_pose('aubo_baselink').pose
@@ -117,27 +120,27 @@ class Renovationrobot_motion():
         # rospy.sleep(0.2)
 
         # motion of rod climbing robot
-        print("rodclimbing_robot_targetjoints=",rodclimbing_robot_targetjoints)
-        rodclimbing_robot_targetjoints=np.array([-0.5,0])
-        print("rodclimbing_robot_targetjoints=", rodclimbing_robot_targetjoints)
+        # print("rodclimbing_robot_targetjoints=",rodclimbing_robot_targetjoints)
+        # rodclimbing_robot_targetjoints=np.array([-0.5,0])
+        # print("rodclimbing_robot_targetjoints=", rodclimbing_robot_targetjoints)
 
-        rodclimbing_robot.set_joint_value_target(rodclimbing_robot_targetjoints)
-        rodclimbing_robot_state=rodclimbing_robot.go()
-        rospy.sleep(0.2)
+        # rodclimbing_robot.set_joint_value_target(rodclimbing_robot_targetjoints)
+        # rodclimbing_robot_state=rodclimbing_robot.go()
+        # rospy.sleep(0.2)
 
         # visualization of target painting region
-        frame = 'base_link'
-        for i in range(len(painting_targetregion_onecell)):
-            visualization_num = visualization_num + 1
-            waypoints = painting_targetregion_onecell[i]
-            waypoints[0] = waypoints[0] + self.distance*cos(theta_z)
-            waypoints[1] = waypoints[1] + self.distance*sin(theta_z)
-            waypoints[3] = waypoints[3] + self.distance*cos(theta_z)
-            waypoints[4] = waypoints[4] + self.distance*sin(theta_z)
+        # frame = 'base_link'
+        # for i in range(len(painting_targetregion_onecell)):
+        #     visualization_num = visualization_num + 1
+        #     waypoints = painting_targetregion_onecell[i]
+        #     waypoints[0] = waypoints[0] + self.distance*cos(theta_z)
+        #     waypoints[1] = waypoints[1] + self.distance*sin(theta_z)
+        #     waypoints[3] = waypoints[3] + self.distance*cos(theta_z)
+        #     waypoints[4] = waypoints[4] + self.distance*sin(theta_z)
 
-            print("targetregion_boundaries=:",waypoints)
-            marker1,visualization_num = self.path2_visualization(waypoints, frame, visualization_num)
-            marker_pub.publish(marker1)
+        #     print("targetregion_boundaries=:",waypoints)
+        #     marker1,visualization_num = self.path2_visualization(waypoints, frame, visualization_num)
+        #     marker_pub.publish(marker1)
 
         # computation of forward paths of manipulator
         manipulatorendeffector_targetpose_onecell_new=np.zeros(manipulatorendeffector_targetpose_onecell.shape)
@@ -156,37 +159,37 @@ class Renovationrobot_motion():
                     paintingrobotendeffector_targetpose_onecell_new[2*i][j]=paintingrobotendeffector_targetpose_onecell[2*i+1][j]
                     paintingrobotendeffector_targetpose_onecell_new[2*i+1][j]=paintingrobotendeffector_targetpose_onecell[2*i][j]
         # visualization of planned paths of manipulator
-        # frame='base_link'
-        # visualization_num=visualization_num+1
-        # marker1,visualization_num=self.path1_visualization(paintingrobotendeffector_targetpose_onecell_new,frame,visualization_num)
-        # marker_pub.publish(marker1)
+        frame='base_link'
+        visualization_num=visualization_num+1
+        marker1,visualization_num=self.path1_visualization(paintingrobotendeffector_targetpose_onecell_new,frame,visualization_num)
+        marker_pub.publish(marker1)
 
         # computation of inverse joints of manipulator
-        interval = 0.10
-        aubo_joints_list=np.array([0.7432146906113353, -0.6072259915236845, 1.387201205355398, 1.9944271968790823, 0.8275816361835613, 1.5707963267948966])
-        previous_aubo_joints=aubo_joints_list
-        for i in range(len(manipulatorendeffector_targetpose_onecell_new)-1):
-            p1=np.array([manipulatorendeffector_targetpose_onecell_new[i][0],manipulatorendeffector_targetpose_onecell_new[i][1],manipulatorendeffector_targetpose_onecell_new[i][2]])
-            p2=np.array([manipulatorendeffector_targetpose_onecell_new[i+1][0],manipulatorendeffector_targetpose_onecell_new[i+1][1],manipulatorendeffector_targetpose_onecell_new[i+1][2]])
-            distance=sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2+(p1[2]-p2[2])**2)
-            p=np.zeros(3)
-            if i==len(manipulatorendeffector_targetpose_onecell_new)-2:
-                num = int(distance / interval)+2
-            else:
-                num = int(distance / interval)+1
-            for j in range(num):
-                p[0] = p1[0] + (p2[0] - p1[0]) / distance * interval * j
-                p[1] = p1[1] + (p2[1] - p1[1]) / distance * interval * j
-                p[2] = p1[2] + (p2[2] - p1[2]) / distance * interval * j
-                q=np.array([manipulatorendeffector_targetpose_onecell_new[i][3],manipulatorendeffector_targetpose_onecell_new[i][4],manipulatorendeffector_targetpose_onecell_new[i][5]])
-                T_mat_generation=pose2mat()
-                mat=T_mat_generation.mat4x4(p,q)
-                mat1=np.ravel(mat)
-                mat2=mat1.tolist()
-                aubo_arm = Aubo_kinematics()
-                aubo_joints_onepoint=aubo_arm.GetInverseResult(mat2,previous_aubo_joints)
-                previous_aubo_joints=aubo_joints_onepoint
-                aubo_joints_list=np.append(aubo_joints_list,aubo_joints_onepoint,axis=0)
+        # interval = 0.10
+        # aubo_joints_list=np.array([0.7432146906113353, -0.6072259915236845, 1.387201205355398, 1.9944271968790823, 0.8275816361835613, 1.5707963267948966])
+        # previous_aubo_joints=aubo_joints_list
+        # for i in range(len(manipulatorendeffector_targetpose_onecell_new)-1):
+        #     p1=np.array([manipulatorendeffector_targetpose_onecell_new[i][0],manipulatorendeffector_targetpose_onecell_new[i][1],manipulatorendeffector_targetpose_onecell_new[i][2]])
+        #     p2=np.array([manipulatorendeffector_targetpose_onecell_new[i+1][0],manipulatorendeffector_targetpose_onecell_new[i+1][1],manipulatorendeffector_targetpose_onecell_new[i+1][2]])
+        #     distance=sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2+(p1[2]-p2[2])**2)
+        #     p=np.zeros(3)
+        #     if i==len(manipulatorendeffector_targetpose_onecell_new)-2:
+        #         num = int(distance / interval)+2
+        #     else:
+        #         num = int(distance / interval)+1
+        #     for j in range(num):
+        #         p[0] = p1[0] + (p2[0] - p1[0]) / distance * interval * j
+        #         p[1] = p1[1] + (p2[1] - p1[1]) / distance * interval * j
+        #         p[2] = p1[2] + (p2[2] - p1[2]) / distance * interval * j
+        #         q=np.array([manipulatorendeffector_targetpose_onecell_new[i][3],manipulatorendeffector_targetpose_onecell_new[i][4],manipulatorendeffector_targetpose_onecell_new[i][5]])
+        #         T_mat_generation=pose2mat()
+        #         mat=T_mat_generation.mat4x4(p,q)
+        #         mat1=np.ravel(mat)
+        #         mat2=mat1.tolist()
+        #         aubo_arm = Aubo_kinematics()
+        #         aubo_joints_onepoint=aubo_arm.GetInverseResult(mat2,previous_aubo_joints)
+        #         previous_aubo_joints=aubo_joints_onepoint
+        #         aubo_joints_list=np.append(aubo_joints_list,aubo_joints_onepoint,axis=0)
 
         # points_num=len(aubo_joints_list)/6
         # if mobileplatform_state==True and rodclimbing_robot_state==True:
@@ -217,8 +220,8 @@ class Renovationrobot_motion():
         #     rospy.sleep(0.2)
 
         # homing of manipulator
-        arm.set_named_target('home3')
-        arm.go()
+        # arm.set_named_target('home3')
+        # arm.go()
         visualization_num = visualization_num + 1
         return visualization_num
 
@@ -320,13 +323,13 @@ class Renovationrobot_motion():
 
 
 if __name__ == "__main__":
-    mat_path="/home/zy/catkin_ws/src/paintingrobot_related/paintingrobot_planning/script/planner_result/data.mat"
+    mat_path="/home/zy/catkin_ws/src/paintingrobot_related/paintingrobot_workspacebased_planning/script/planner_result/data.mat"
     # mat_path="package://paintingrobot_planning/script/data.mat"
     data = io.loadmat(mat_path)
     manipulatorbase_targetpose=data['renovation_cells_manipulatorbase_positions']
     manipulatorendeffector_targetpose=data['manipulator_endeffector_positions']
-    paintingrobotendeffector_targetpose=data['renovationcells_pathswaypoints_classified']
-    paintingcells_region=data['renovation_cells_edges_classified']
+    paintingrobotendeffector_targetpose=data['renovation_cells_waypioints_onpath']
+    # paintingcells_region=data['renovation_cells_edges_classified']
 
     moveit_commander.roscpp_initialize(sys.argv)
     rospy.init_node('paintingrobot_simulation', anonymous=True)
@@ -350,13 +353,14 @@ if __name__ == "__main__":
                             manipulatorbase_targetpose_onecell = manipulatorbase_targetpose[0][i][0][j][0][k]
                             manipulatorendeffector_targetpose_onecell = manipulatorendeffector_targetpose[0][i][0][j][0][k]
                             paintingrobotendeffector_targetpose_onecell = paintingrobotendeffector_targetpose[0][i][0][j][0][k]
-                            painting_targetregion_onecell = paintingcells_region[0][i][0][j][0][k]
+                            # painting_targetregion_onecell = paintingcells_region[0][i][0][j][0][k]
 
                             # print("manipulatorbase_targetpose_onecell=",manipulatorbase_targetpose_onecell)
                             # print("manipulatorendeffector_targetpose_onecell=",manipulatorendeffector_targetpose_onecell)
                             # Paintrobot.show_obstacles()
 
-                            visualization_num=Paintrobot.motion(manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,paintingrobotendeffector_targetpose_onecell,painting_targetregion_onecell,visualization_num)
+                            # visualization_num=Paintrobot.motion(manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,paintingrobotendeffector_targetpose_onecell,painting_targetregion_onecell,visualization_num)
+                            visualization_num=Paintrobot.motion(manipulatorbase_targetpose_onecell,manipulatorendeffector_targetpose_onecell,paintingrobotendeffector_targetpose_onecell,visualization_num)
                             visualization_num=visualization_num+1
     except rospy.ROSInterruptException:
         pass
